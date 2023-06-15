@@ -42,25 +42,44 @@ jobs:
         run: |
           pyinstaller main.py --onefile
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          path: dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v2
+#         with:
+#           path: dist/*
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           repo-token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Create Release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: main.exe
+          path: dist/
+      
+      - name: create release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
           body: |
-            Changes in this Release
-            - First Change
-            - Second Change
+            Test Release
           draft: false
           prerelease: false
+          
+#       # Since we have a directory, create a zip
+#       - name: zip the artifect dir into a zip
+#         run: |
+#           powershell Compress-Archive D:\a\SWEN90013-Data-Platform-for-Biomaterial-Testing\SWEN90013-Data-Platform-for-Biomaterial-Testing\dist\app D:\a\SWEN90013-Data-Platform-for-Biomaterial-Testing\SWEN90013-Data-Platform-for-Biomaterial-Testing\dist\app.zip
+      
+      - name: Upload release asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           upload_url: ${{ steps.create_release.outputs.upload_url }}
+           asset_path: dist/main.exe
+           asset_name: main.exe
+#            asset_content_type: application/zip
