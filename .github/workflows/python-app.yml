@@ -1,60 +1,39 @@
-name: Build and Release
+name: PyInstaller Windows
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+    
   pull_request:
     branches: [ "main" ]
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
-  build:
-
-    name: Package py to exe
-
-    strategy:
-      matrix:
-        os: [ windows-latest ]
-        python-version: ["3.9"]
-        # os: [ ubuntu-latest, macos-latest, windows-latest ]
-        # os: [ ubuntu-latest ]
-        # python-version: ["3.9", "3.10"]
-
-    runs-on: ${{ matrix.os }}
-
-
+  build-windows:
+    runs-on: windows-2019
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/checkout@v1
+      - name: Install Python
+        uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.8'
           architecture: 'x64'
-
-      - name: Install dependencies
+      - name: Install requirements and installer
         run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller 
-          
-  # impacket
-
-      - name: Package Artifacts
+          pip install -r requirements.txt
+          pip install pyinstaller
+      - name: Run pyinstaller
         run: |
-          pyinstaller main.py --onefile
-
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v2
-#         with:
-#           path: dist/*
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+          python -m PyInstaller main.py
       - uses: actions/upload-artifact@v2
         with:
-          path: dist/*
+          name: app
+          path: dist/main
       
       - name: create release
         id: create_release
@@ -72,7 +51,7 @@ jobs:
       # Since we have a directory, create a zip
       - name: zip the artifect dir into a zip
         run: |
-          powershell Compress-Archive D:\a\test\test\dist\ D:\a\test\test\dist\app.zip
+          powershell Compress-Archive D:\a\test\test\dist\main D:\a\test\test\dist\main.zip
       
       - name: Upload release asset
         id: upload-release-asset
@@ -84,3 +63,94 @@ jobs:
            asset_path: dist/app.zip
            asset_name: app.zip
            asset_content_type: application/zip
+
+
+
+
+
+# name: Build and Release
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ "main" ]
+
+
+# jobs:
+#   build:
+
+#     name: Package py to exe
+
+#     strategy:
+#       matrix:
+#         os: [ windows-latest ]
+#         python-version: ["3.9"]
+#         # os: [ ubuntu-latest, macos-latest, windows-latest ]
+#         # os: [ ubuntu-latest ]
+#         # python-version: ["3.9", "3.10"]
+
+#     runs-on: ${{ matrix.os }}
+
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
+#       - name: Setup Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: ${{ matrix.python-version }}
+#           architecture: 'x64'
+
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install pyinstaller 
+          
+#   # impacket
+
+#       - name: Package Artifacts
+#         run: |
+#           pyinstaller main.py --onefile
+
+# #       - name: Upload artifact
+# #         uses: actions/upload-artifact@v2
+# #         with:
+# #           path: dist/*
+# #         env:
+# #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# #           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+#       - uses: actions/upload-artifact@v2
+#         with:
+#           path: dist/*
+      
+#       - name: create release
+#         id: create_release
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+# #           tag_name: ${{ github.run_number }}
+# #           release_name: Release ${{ github.run_number }}
+#           body: |
+#             Test Release
+#           draft: false
+#           prerelease: false
+          
+#       # Since we have a directory, create a zip
+#       - name: zip the artifect dir into a zip
+#         run: |
+#           powershell Compress-Archive D:\a\test\test\dist\ D:\a\test\test\dist\app.zip
+      
+#       - name: Upload release asset
+#         id: upload-release-asset
+#         uses: actions/upload-release-asset@v1
+#         env:
+#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#            upload_url: ${{ steps.create_release.outputs.upload_url }}
+#            asset_path: dist/app.zip
+#            asset_name: app.zip
+#            asset_content_type: application/zip
