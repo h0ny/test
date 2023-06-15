@@ -52,8 +52,8 @@ jobs:
           
       - uses: actions/upload-artifact@v2
         with:
-          name: app
-          path: dist/app
+          name: main.exe
+          path: dist/
       
       - name: create release
         id: create_release
@@ -71,7 +71,7 @@ jobs:
       # Since we have a directory, create a zip
       - name: zip the artifect dir into a zip
         run: |
-          powershell Compress-Archive D:\a\test\test\dist\app D:\a\test\test\dist\app.zip
+          powershell Compress-Archive D:\a\test\test\dist\ D:\a\test\test\dist\app.zip
       
       - name: Upload release asset
         id: upload-release-asset
