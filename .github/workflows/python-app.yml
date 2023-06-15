@@ -53,6 +53,15 @@ jobs:
 #             Test Release
 #           draft: false
 #           prerelease: false
+      
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            dist/*
           
       # Since we have a directory, create a zip
       - name: zip the artifect dir into a zip
@@ -65,7 +74,7 @@ jobs:
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-           upload_url: ${{ steps.create_release.outputs.upload_url }}
+#            upload_url: ${{ steps.create_release.outputs.upload_url }}
            asset_path: dist/app.zip
            asset_name: app.zip
            asset_content_type: application/zip
